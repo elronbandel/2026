@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: "Ready For General Agents? Let's Test It."
-description: General-purpose agents are emerging, promising seamless deployment across environments. Yet current evaluation methods cannot measure their adaptability to unseen environments-the very core of their generality. We outline key challenges and propose a path toward an evaluation framework designed to progress general agents, one that enables robust, cross-environment testing without limiting innovation.
+description: General-purpose agents are emerging, carrying the promise of seamless deployment across environments. However, current evaluation methods cannot measure their adaptability to diverse unseen environments—the foundation of true generality. We outline key challenges and chart a path toward an evaluation framework that supports robust, cross-environment testing designed for progressing general agents.
 date: 2026-04-27
 future: true
 htmlwidgets: true
