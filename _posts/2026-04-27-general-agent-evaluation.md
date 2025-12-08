@@ -31,8 +31,8 @@ toc:
   - name: Existing Agent-Environment Protocols insufficiency
   - name: General Agent Evaluation Framework
     subsections:
-      - name: A Meta-Protocol for General Evaluation
-      - name: Core Characteristics of a General Evaluation Framework
+      - name: A Meta-Protocol for General Agent Evaluation
+      - name: Core Characteristics of a General Agent Evaluation Framework
   - name: Conclusions
 ---
 
@@ -322,15 +322,15 @@ Since no current protocol perfectly fits evaluation needs, the next section expl
 
 Advancing general-purpose agents requires an evaluation framework that is itself general: capable of supporting different environments, diverse agent architectures, and multiple communication protocols. Yet standardizing such evaluation is intrinsically difficult. Environments vary widely, implicit assumptions fragment the space, and existing protocols address only parts of the challenge. Even promising standards such as MCP provide useful building blocks but remain incomplete. These pressures motivate the need for a unifying layer that can support evaluating any agent on any benchmark without restriction to a specific communication protocol.
 
-### A Meta-Protocol for General Evaluation
+### A Meta-Protocol for General Agent Evaluation
 
 At the core of such a framework is a meta-protocol: an abstract, protocol-agnostic layer that defines the semantics of evaluation independently of any concrete agent-environment protocol. Current benchmarks implicitly bind evaluation to a specific communication protocol, thereby entangling agent performance with protocol-specific setup.
 
 The meta-protocol needs to specify how tasks, actions, observations, documentation, and termination conditions are represented while allowing different communication protocols. Such a protocol can allow communication interfaces, such as web browsing, terminal, MCP, and tool schemas, without altering the evaluation semantics.
 
-By enabling protocol modularity rather than protocol uniformity, a meta-protocol allows agents to be evaluated in their native interaction modes and makes cross-protocol comparisons meaningful. Under this abstraction, the practical requirements of a general evaluation framework can be defined cleanly and without protocol-specific assumptions.
+By enabling protocol modularity rather than protocol uniformity, a meta-protocol allows agents to be evaluated in their native interaction modes and makes cross-protocol comparisons meaningful. Under this abstraction, the practical requirements of a general agent evaluation framework can be defined cleanly and without protocol-specific assumptions.
 
-### Core Characteristics of a General Evaluation Framework
+### Core Characteristics of a General Agent Evaluation Framework
 
 - Environment-agnostic agent interface. The agent-facing interface should function across any environment. Environments expose a minimal, standardized schema for actions, observations, tasks, and documentation, with all assumptions explicit and discoverable rather than embedded in reference agents.
 - Agent-agnostic environment interface. Environments should not assume a specific agent architecture, reasoning style, or protocol. Simple ReAct agents, memory-augmented agents, MCP-based agents, browser agents, and command-line agents should all integrate without modification.
