@@ -7,7 +7,18 @@ date: 2026-04-27
 future: true
 htmlwidgets: true
 authors:
-  - name: Anonymous
+  - name: Elron Bandel
+    url: "https://www.linkedin.com/in/elron/"
+    affiliations:
+      name: IBM Research
+  - name: Asaf Yehudai
+    url: "https://www.linkedin.com/in/asaf-yehudai/"
+    affiliations:
+      name:
+  - name: Michal Shmueli-Scheuer
+    url: "https://research.ibm.com/people/michal-shmueli-scheuer"
+    affiliations:
+      name:
 bibliography: 2026-04-27-general-agent-evaluation.bib
 toc:
   - name: Preliminary
@@ -40,11 +51,12 @@ toc:
 Over the past few years, the NLP community has shifted from building domain-specific systems - such as standalone summarization or translation models - toward developing general-purpose language models <d-cite key="brown2020languagemodelsfewshotlearners"></d-cite><d-cite key="bommasani2022opportunitiesrisksfoundationmodels"></d-cite>. Many see this trend as a contemporary example of Richard Sutton's "bitter lesson" <d-cite key="sutton2019bitter"></d-cite>:
 
 > "The biggest lesson that can be read from 70 years of AI research is that general methods that leverage computation are ultimately the most effective, and by a large margin."
+
 This transition was not abrupt. It emerged from a long sequence of incremental advances that gradually expanded the scope and capability of models. Along the way, domain-specific solutions and increasingly general methods coexisted, each informing and accelerating the other.
 
 In this blog post, we argue that a similar shift is now unfolding in the field of AI agents: the field is moving from domain-specialized agents toward increasingly general-purpose ones. Agents that can address diverse types of multi-step tasks across different target domains and previously unseen environments.
 
-This development highlights the need for a unified evaluation framework for general-purpose agents that assesses their abilities across environments and compares different architectures. Such a framework is crucial for tracking progress, identifying gaps, and guiding the development of next-generation general agents. It is also essential for evaluating the core of generality itself: an agent's ability to integrate into new environments and perform successfully.
+This development highlights the need for a unified evaluation framework for general-purpose agents that assesses their abilities across environments and compares different architectures. Such a framework is crucial for tracking progress, identifying gaps, and guiding the development of next-generation general agents <d-cite key="bandel2026positionagentic"></d-cite>. It is also essential for evaluating the core of generality itself: an agent's ability to integrate into new environments and perform successfully.
 
 We begin by introducing a shared terminology for discussing domain and general agents, their evaluation, and the agent-to-environment communication protocol ([Sec.2](#preliminary)). Next, we describe how today's domain agents are evolving toward greater generality and outline the effect we expect it to have on general agents ([Sec.3](#the-shift-to-general-agents)). The benefits of general-purpose agents and their advantages through two representative use cases follow in [Sec.4](#the-promise-of-general-agents), motivating the need for evaluation solutions that can assess general agent capabilities. For that end, we survey the current landscape of agent evaluation, presenting a five-level taxonomy ([Sec.5](#state-of-general-agent-evaluation)), and detail the limitations that make existing approaches insufficient for easily evaluating general agents ([Sec.6](#challenges-in-general-agent-evaluation)). We then assess whether existing agentic protocols can address these limitations ([Sec.7](#existing-agent-environment-protocols)). Finally, we outline key requirements that a general agent solution needs to fulfill ([Sec.8](#general-agent-evaluation-framework)).
 
@@ -74,9 +86,9 @@ Although these agents are simple, equipping them with the right tools can provid
 
 On the other hand, such agents fall short when compared to more complex and specialized agents on target domains. Such domain agents are utilizing much more structure; they tend to have components for planning, memory, state tracking, tool use, and error handling to support reliable, iterative interaction with the domain environment. They are topping domain-specific leaderboards and providing real-world value. For example, SWE agents are already solving millions of GitHub issues without intervention <d-cite key="PRArena"></d-cite>, and deep research agents are being deployed to millions of users <d-cite key="McKay2025_OpenAIDeepResearch"></d-cite>.
 
-While different domain agents are by design different from one another, they share similar components. If we look at different SWE agents, such as Claude Code, Codex-cli, and different deep research agents such as OpenAI and Perplexity ones, they are all sharing similar algorithmic components <d-cite key="bgauryy_open-docs_2025"></d-cite><d-cite key="langchain_ai_open_deep_research_2025"></d-cite>. Moreover, each of those components is not specific to its domain, but is a general component that could be used for any target domain. As a result, such domain agents that rely on general components can be easily adopted to other domains and tasks. For example, recently, Anthropic published:
+While different domain agents are by design different from one another, they share similar components. If we look at different SWE agents, such as Claude Code, Codex-cli, and different deep research agents such as OpenAI and Perplexity ones, they are all sharing similar algorithmic components <d-cite key="bgauryy_open-docs_2025"></d-cite><d-cite key="langchain_ai_open_deep_research_2025"></d-cite> documented in [open-docs](https://github.com/bgauryy/open-docs). Moreover, each of those components is not specific to its domain, but is a general component that could be used for any target domain. As a result, such domain agents that rely on general components can be easily adopted to other domains and tasks. For example, recently, Anthropic published:
 "Over the past several months, Claude Code has become far more than a coding tool. At Anthropic, we've been using it for deep research, video creation, and note-taking, among countless other non-coding applications. In fact, it has begun to power almost all of our major agent loops."
-Additionally, they released their Claude Agent SDK to serve as building blocks for developing other agents <d-cite key="anthropic_claude_agent_sdk_2025"></d-cite>. This demonstrates that domain-specific agents are becoming more proficient and general, allowing them to target a wider set of tasks. This also shows the new type of general agents, composed of plugable general components that can apply to a diverse set of domains across different environments.
+Additionally, they released their [Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk) to serve as building blocks for developing other agents <d-cite key="anthropic_claude_agent_sdk_2025"></d-cite>. This demonstrates that domain-specific agents are becoming more proficient and general, allowing them to target a wider set of tasks. This also shows the new type of general agents, composed of plugable general components that can apply to a diverse set of domains across different environments.
 
 
 ## The Promise of General Agents
@@ -87,16 +99,19 @@ Next, we examine two concrete examples of SWE and scientific agents that demonst
 
 ### Case 1: Scientific Agents
 
-ASTA Bench <d-cite key="bragg2025astabenchrigorousbenchmarkingai"></d-cite>, an effort towards benchmarking deep scientific research agents, provides a clear test. As shown in Table 1, the specialized ASTA-v0 system scores 55% at \$3.40 per task and contains subsystems exceeding 13,000 lines of code (LOC)[^asta-loc]. Yet the second-best system is a 300-line ReAct general agent scoring 44% at just \$0.31. On the literature-understanding subtask, ReAct scores 53%; although still below the Asta agent (62%) it is still outperforming both the specialized ASTA Paper Finder (21%) and OpenAI Deep Research (19%).
+ ASTA Bench <d-cite key="bragg2025astabenchrigorousbenchmarkingai"></d-cite>, an effort towards benchmarking deep scientific research agents, provides a clear test. As shown in [Table 1](#table-1), the specialized ASTA-v0 system scores 53% at \$3.40 per task and contains subsystems exceeding 13,000 lines of code (LOC)[^asta-loc]. Yet the second-best system is a 358-line ReAct general agent (as a baseline architecture) scoring 44% at just \$0.31. On the literature-understanding subtask, ReAct scores 53%; although still below the Asta agent (62%) it is still outperforming both the specialized ASTA Paper Finder (21%) and OpenAI Deep Research (19%).
 
 ---
+<div id="table-1" markdown="1">
 
 | Agent   | LLMs used | ASTA score | Cost per task | LOC |
 |---------|-----------|------------|---------------|-----|
-| ASTA-v0 | Claude 4 Sonnet, Gemini 2.5 Flash, O3, GPT 4.1, GPT-4o | 53% | \$3.40 | >13,768[^asta-loc] |
-| ReAct   | GPT-5 | 44% | \$0.31 | 358[^react-code] |
+| [ASTA-v0](https://github.com/allenai/asta-bench/tree/f507043) | Claude 4 Sonnet, Gemini 2.5 Flash, O3,<br>GPT 4.1, GPT-4o | 53% | \$3.40 | >13,768[^asta-loc] |
+| [ReAct](https://github.com/allenai/asta-bench/blob/f7e25392f4dda167f4e6d46b8c7c080eeeb4cc35/astabench/solvers/react/basic_agent.py)   | GPT-5 | 44% | \$0.31 | 358[^react-code] |
 
-> Table 1: In scientific tasks, a tiny general agent (ReAct) approaches the performance of a large specialized system (ASTA-v0) at a fraction of the cost and complexity.
+</div>
+
+> [Table 1](#table-1): In scientific tasks, a tiny general agent (ReAct) approaches the performance of a large specialized system (ASTA-v0) at a fraction of the cost and complexity.
 
 ---
 
@@ -105,16 +120,27 @@ ASTA Bench <d-cite key="bragg2025astabenchrigorousbenchmarkingai"></d-cite>, an 
 
 ### Case 2: SWE Agents
 
-In SWE-Bench <d-cite key="yang2025swesmith"></d-cite>, the specialized SWE-Agent scores 67%, but the tiny, domain-agnostic Mini SWE-Agent scores 65% while being 30 times smaller and about 7 times cheaper per run (Table 2). Across both scientific and SWE settings, small general agents of a few hundred lines consistently achieve 70% to 95% of the performance of systems that are thousands of lines.
+ In SWE-Bench  leaderboard<d-cite key="yang2025swesmith"></d-cite>, the specialized SWE-Agent scores 67%, but the tiny, domain-agnostic Mini SWE-Agent scores 65% while being 30 times smaller and about 7 times cheaper per run ([Table 2](#table-2)). Across both scientific and SWE settings, small general agents of a few hundred lines consistently achieve 70% to 95% of the performance of systems that are thousands of lines [^swebench-leaderboard].
+
+
+[^swebench-leaderboard]: SWE-Bench verified leaderboard entries used here: SWE-Agent (67%, 2025-05-22) and mini-SWE-Agent (65%, 2025-07-26), source: https://www.swebench.com.
+
+[^sweagent-cost]: Based on the reported per-task costs from the same SWE-Bench verified entries used above.
+[^sweagent-loc]: Based on the python files in https://github.com/SWE-agent/SWE-agent/tree/main/sweagent/agent.
+[^mini-sweagent-loc]: Source: https://github.com/SWE-agent/mini-swe-agent/blob/main/src/minisweagent/agents/default.py.
 
 ---
 
+<div id="table-2" markdown="1">
+
 | Agent | LLM | SWE-Bench score | Cost per task | LOC |
 |-------|-----|-----------------|---------------|-----|
-| SWE-Agent | Claude 4 Sonnet | 67% | ~\$2.50 | 4,161 |
-| Mini SWE-Agent | Claude 4 Sonnet | 65% | \$0.37 | 131 |
+|[SWE-Agent](https://github.com/SWE-agent/SWE-agent/tree/main/sweagent/agent) | Claude 4 Sonnet | 67%[^swebench-leaderboard] | ~\$2.50[^sweagent-cost] | 4,161[^sweagent-loc] |
+|[Mini SWE-Agent](https://github.com/SWE-agent/mini-swe-agent/blob/main/src/minisweagent/agents/default.py) | Claude 4 Sonnet | 65%[^swebench-leaderboard] | \$0.37 | 131[^mini-sweagent-loc] |
 
-> Table 2: In software engineering tasks, a minimal general agent nearly matches a specialized SWE agent while being far smaller and cheaper.
+</div>
+
+> [Table 2](#table-2): In software engineering tasks, a minimal general agent nearly matches a specialized SWE agent while being far smaller and cheaper.
 
 ---
 
@@ -152,15 +178,17 @@ A representative example is HAL <d-cite key="hal"></d-cite> compiled nine benchm
 
 The fourth level moves beyond fixed agent setups by defining a standardized interaction protocol, such as a unified browser API or terminal interface, that any agent can implement. Instead of each environment defining its own custom agent-to-environment communication protocol, this standardization forces the agent to follow a specific protocol to be consistently evaluated across many environments. This enables comparisons not just across models, but also across different agent architectures.
 
-However, protocol-centric frameworks still impose a specific mode of interaction. Agents built around fundamentally different communication protocols, such as those using the Model Context Protocol (MCP), cannot be evaluated in their native form. They must be forced through the protocol's interface, which can obscure their design and distort performance. For example, Harbor <d-cite key="tbench_2025"></d-cite> evaluates agents through a command-line protocol, preventing MCP-based agents like Claude Code from being tested as intended.
+However, protocol-centric frameworks still impose a specific mode of interaction. Agents built around fundamentally different communication protocols, such as those using the Model Context Protocol (MCP), cannot be evaluated in their native form. They must be forced through the protocol's interface, which can obscure their design and distort performance. For example, [Harbor](https://github.com/laude-institute/harbor/blob/main/src/harbor/agents/base.py) <d-cite key="tbench_2025"></d-cite> evaluates agents through a command-line protocol, preventing MCP-based agents like Claude Code from being tested as intended.
 
-Representative examples include BrowserGym <d-cite key="chezelles2025browsergym"></d-cite>, which standardizes browser interaction across diverse web tasks, and Harbor <d-cite key="tbench_2025"></d-cite>, which provides a unified terminal protocol.
+Representative examples include BrowserGym <d-cite key="chezelles2025browsergym"></d-cite>, which standardizes browser interaction across diverse web tasks, and [Harbor](https://github.com/laude-institute/harbor/blob/main/src/harbor/agents/base.py) <d-cite key="tbench_2025"></d-cite>, which provides a unified terminal protocol.
 
 ### Level 5: General Agent Evaluation
 
-A fifth level, still missing today, would provide a framework for general agent evaluation. It will enable the evaluation of the same agent across environments without being forced to use a specific communication protocol. It would reveal how an agent actually performs in realistic settings, how design choices influence outcomes, and how well agents generalize across diverse tasks and environments. Achieving this level of flexibility and fairness remains an open challenge, and the lack of a unified, protocol-agnostic evaluation paradigm is a central barrier to progress toward genuinely general-purpose agents.
+A fifth level, still missing today, would provide a framework for general agent evaluation<d-cite key="bandel2026generalagentevaluation"></d-cite><d-cite key="bandel2026positionagentic"></d-cite>. It will enable the evaluation of the same agent across environments without being forced to use a specific communication protocol. It would reveal how an agent actually performs in realistic settings, how design choices influence outcomes, and how well agents generalize across diverse tasks and environments. Achieving this level of flexibility and fairness remains an open challenge, with the lack of a unified, protocol-agnostic evaluation paradigm as a central barrier to progress toward genuinely general-purpose agents.
 
 ---
+
+<div id="table-3" markdown="1">
 
 | Level | Cross-model | Agentic environment interaction | Cross-environment | Cross-agent | Protocol-agnostic | Examples |
 |-------|-------------|---------------------------------|-------------------|-------------|-------------------|----------|
@@ -170,7 +198,9 @@ A fifth level, still missing today, would provide a framework for general agent 
 | 4: Protocol-centric | Yes | Yes | Yes | Yes | No | BrowserGym, Harbor |
 | 5: General agent evaluation | Yes | Yes | Yes | Yes | Yes | (missing) |
 
-> Table 3: Comparison of the five levels of agent evaluation, highlighting cross-model, cross-environment, cross-agent, and protocol coverage.
+</div>
+
+> [Table 3](#table-3): Comparison of the five levels of agent evaluation, highlighting cross-model, cross-environment, cross-agent, and protocol coverage.
 
 ---
 
@@ -182,7 +212,7 @@ Benchmarking general agents in different benchmarking environments is challengin
 
 Many benchmarks implicitly assume the tested agent possesses certain built-in, domain-specific capabilities. For example:
 
-- Tau-Bench <d-cite key="yao2024tau"></d-cite><d-cite key="barres2025tau2"></d-cite> assumes an agent that can inherently message or converse with a user:
+- [Tau-Bench](https://github.com/sierra-research/tau2-bench/blob/main/src/tau2/agent/base.py) <d-cite key="yao2024tau"></d-cite><d-cite key="barres2025tau2"></d-cite> assumes an agent that can inherently message or converse with a user:
 
 ```python
 class BaseAgent(ABC, Generic[AgentState]):
@@ -192,7 +222,7 @@ class BaseAgent(ABC, Generic[AgentState]):
         ...
 ```
 
-- WebArena <d-cite key="zhou2024webarenarealisticwebenvironment"></d-cite> assumes an agent whose entire perceptual and action space is mediated through a browser interface controlled by predefined actions:
+- [WebArena](https://github.com/web-arena-x/webarena/blob/main/agent/agent.py) <d-cite key="zhou2024webarenarealisticwebenvironment"></d-cite> assumes an agent whose entire perceptual and action space is mediated through a browser interface controlled by predefined actions:
 
 ```python
 class Agent:
@@ -203,7 +233,7 @@ class Agent:
         ...
 ```
 
-- Terminal Bench <d-cite key="tbench_2025"></d-cite> assumes an agent whose interaction interface is a computer with a command line:
+- [Terminal Bench](https://github.com/laude-institute/harbor/blob/main/src/harbor/agents/base.py) <d-cite key="tbench_2025"></d-cite> assumes an agent whose interaction interface is a computer with a command line:
 
 ```python
 class BaseAgent(ABC):
@@ -220,19 +250,23 @@ These assumptions are mutually incompatible. A web-browsing agent cannot convers
 
 ---
 
+<div id="figure-1" markdown="1">
+
 {% include figure.liquid path="assets/img/2026-04-27-general-agent-evaluation/benchmark_agent_cross.png" class="img-fluid" %}
 
-> Figure 1: Illustration of agents in different benchmarks and their incompatibility with the environment constraints of other benchmarks. Tau-Bench assumes user messaging, which does not align with TerminalBench or WebArena.
+</div>
+
+> [Figure 1](#figure-1): Illustration of agents in different benchmarks and their incompatibility with the environment constraints of other benchmarks. Tau-Bench assumes user messaging, which does not align with TerminalBench or WebArena.
 
 ---
 
 ### Lack of Standardized Environment Interfaces
 
-Benchmarks rarely specify, in an agent-agnostic way, what task the agent must perform, what information it should receive, or what actions it can take and how those actions affect the environment. As a result, developers are often left to infer or invent these elements themselves.
+Benchmarks rarely specify, in an agent-agnostic way, what task the agent must perform, what information it should receive, or what actions it can take and how those actions affect the environment. As shown in [Table 4](#table-4), developers are often left to infer or invent these elements themselves.
 
 SWE-Bench <d-cite key="yang2025swesmith"></d-cite> exemplifies this lack of specification. Although the benchmark defines issues the agent should solve, it does not supply standard instructions on how the issues should be solved, how the solution will be validated, or how the submitted solution should be structured. Without an explicit environment interface for agents solving the benchmark, every user must design their own, de-facto creating different setups for different agents, making evaluations difficult to compare.
 
-Other benchmarks present the opposite issue: they do communicate environment semantics, but only in a form tailored to a specific agent architecture. Tau-Bench <d-cite key="yao2024tau"></d-cite><d-cite key="barres2025tau2"></d-cite> is a clear example. Instead of offering a standalone, environment-level description of how an agent should behave, key instructions appear only in the reference conversational LLM agent:
+Other benchmarks present the opposite issue: they do communicate environment semantics, but only in a form tailored to a specific agent architecture. [Tau-Bench](https://github.com/sierra-research/tau2-bench/blob/main/src/tau2/agent/llm_agent.py) <d-cite key="yao2024tau"></d-cite><d-cite key="barres2025tau2"></d-cite> is a clear example. Instead of offering a standalone, environment-level description of how an agent should behave, key instructions appear only in the reference conversational LLM agent:
 
 ```python
 AGENT_INSTRUCTION = """
@@ -254,13 +288,15 @@ Across both cases, the core issue is the same: current benchmarks do not provide
 
 Evaluating general agents across many environments requires more than a common agent-environment integration interface. To support seamless experimentation-without hours spent integrating each new environment-researcher-facing interfaces must also be standardized and simplified. Today, every environment demands its own setup, scripts, and output formats. Researchers repeatedly lose time to these inconsistencies and risk introducing avoidable integration errors.
 
-One example of this fragmentation is the process of collecting and interpreting results. Benchmarks report outcomes in different formats, store them in different locations, and follow different conventions. As shown in Table 4, even the basic metrics differ across three representative benchmarks-not only in which quantities are tracked, but also in terminology and aggregation standards used. A simple notion like success appears as a Boolean resolved flag in SWE-bench, a success field in AppWorld, and an implicit reward of 1 in Tau-bench. Interaction cost is reported as agent cost and user cost in Tau-bench but omitted entirely in AppWorld and SWE-bench.
+One example of this fragmentation is the process of collecting and interpreting results. Benchmarks report outcomes in different formats, store them in different locations, and follow different conventions. As shown in [Table 4](#table-4), even the basic metrics differ across three representative benchmarks-not only in which quantities are tracked, but also in terminology and aggregation standards used. A simple notion like success appears as a Boolean resolved flag in SWE-bench, a success field in AppWorld, and an implicit reward of 1 in Tau-bench. Interaction cost is reported as agent cost and user cost in Tau-bench but omitted entirely in AppWorld and SWE-bench.
 
 Even when benchmarks measure conceptually similar quantities, they adopt incompatible formats, naming conventions, and aggregation methods.
 
 These gaps underscore the need for consolidation and standardization to make large-scale evaluation of general agents feasible. This is not just a convenience - given the growing complexity of modern benchmarks, it is the only viable path to scalable general agent research.
 
 ---
+
+<div id="table-4" markdown="1">
 
 | Metric type | Tau-Bench | AppWorld | SWE-Bench |
 |-------------|-----------|----------|-----------|
@@ -276,7 +312,9 @@ These gaps underscore the need for consolidation and standardization to make lar
 | Success rate (benchmark) | Avg reward | Task goal completion | Resolved counts |
 | Cost aggregate (benchmark) | Avg agent cost | - | - |
 
-> Table 4: Metrics differ across benchmarks, with incompatible names and formats even for basic success and cost reporting.
+</div>
+
+> [Table 4](#table-4): Metrics differ across benchmarks, with incompatible names and formats even for basic success and cost reporting.
 
 ---
 
@@ -299,19 +337,23 @@ MCP defines three core primitives: tools (invocable operations), resources (expo
 
 - Missing Support for Benchmark Task Semantics. Benchmarks center around tasks-the defined goal an agent is supposed to achieve. MCP does not offer a built-in way to represent or communicate such tasks. One could require that tasks always appear in either prompts, resources, or events, but doing so would essentially create a new protocol on top of MCP, showing that MCP by itself is not enough.
 - Missing Support for Evaluation Workflows. Evaluation requires more than interaction; it depends on standardized metrics reporting, aggregation, logging, experiment tracking, and reproducibility. MCP is intentionally agnostic to these needs. While one could build evaluation workflows around MCP sessions, doing so would again amount to defining an additional protocol on top of MCP, rather than using MCP itself as the benchmarking standard.
-- Inconsistent Ecosystem Adoption. Support for MCP remains uneven: many frameworks implement tool calling but not resources or prompts, resulting in inconsistent capabilities and substantial integration overhead (Table 5). This fragmentation makes it difficult for benchmark developers to ensure that agents can reliably interact with their environments, and equally hard for agent developers to obtain consistent baselines across benchmarks.
+- Inconsistent Ecosystem Adoption. Support for MCP remains uneven: many frameworks implement tool calling but not resources or prompts, resulting in inconsistent capabilities and substantial integration overhead ([Table 5](#table-5)). This fragmentation makes it difficult for benchmark developers to ensure that agents can reliably interact with their environments, and equally hard for agent developers to obtain consistent baselines across benchmarks.
 
 ---
 
+<div id="table-5" markdown="1">
+
 | Agent / MCP Integration | Tools | Resources | Prompts |
 |-------------------------|-------|-----------|---------|
-| Smolagents | Yes | No | No |
-| Llama Stack | Yes | No | No |
-| OpenAI Agents SDK | Yes | No | Yes |
-| Codex CLI | Yes | No | No |
-| Claude Code | Yes | Yes | No |
+| [Smolagents](https://huggingface.co/docs/smolagents/reference/tools#smolagents.ToolCollection.from_mcp) | Yes | No | No |
+| [Llama Stack](https://llamastack.github.io/docs/building_applications/tools#model-context-protocol-mcp) | Yes | No | No |
+| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/ref/mcp/server/) | Yes | No | Yes |
+| [Codex CLI](https://developers.openai.com/codex/mcp/) | Yes | No | No |
+| [Claude Code](https://www.anthropic.com/news/claude-code-remote-mcp) | Yes | Yes | No |
 
-> Table 5: MCP integration across common agent frameworks. In many cases, only partial protocol components are implemented.
+</div>
+
+> [Table 5](#table-5): MCP integration across common agent frameworks. In many cases, only partial protocol components are implemented.
 
 ---
 
@@ -347,7 +389,7 @@ Ultimately, an evaluation framework for general agents must measure the core cap
 
 ---
 
-<figure class="text-figure" markdown="1">
+<figure id="figure-2" class="text-figure" markdown="1">
 
 ### Checklist for General Agent Evaluation Framework
 
@@ -390,6 +432,6 @@ Ultimately, an evaluation framework for general agents must measure the core cap
 
 </figure>
 
-> Figure 2: Checklist of requirements for a general agent evaluation framework.
+> [Figure 2](#figure-2): Checklist of requirements for a general agent evaluation framework.
 
 ---
